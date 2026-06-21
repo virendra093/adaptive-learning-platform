@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.local
+
+# Build Outputs
+frontend/dist/
+backend/logs/
+
+# MacOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/

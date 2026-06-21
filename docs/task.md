@@ -1,0 +1,23 @@
+# Adaptive Learning Version 2.0 Tasks
+
+- `[x]` **1. Database Enhancement**
+  - `[x]` Create `backend/database/schema_v3_adaptive.sql`
+  - `[x]` Apply `schema_v3_adaptive.sql` to MySQL database
+- `[/]` **2. Question Bank Expansion**
+  - `[ ]` Create `seed_v2_questions.js` with synthetic generators
+  - `[ ]` Run seeder to generate 2250+ unique questions
+- `[x]` **3. Backend Services Implementation**
+  - `[x]` `knowledgeTrackingService.js` (DKT)
+  - `[x]` `rewardEngineService.js` (RL)
+  - `[x]` `adaptiveEngineService.js` (Test Generation logic)
+  - `[x]` `studentAnalyticsService.js` (Radar/Charts processing)
+- `[x]` **4. Controllers & Routes**
+  - `[x]` Update `testController.js` for new test rules and post-test analytics hooks
+  - `[x]` Update/Create analytics routes for the Dashboard
+- `[x]` **5. Frontend Adjustments**
+  - `[x]` `StudentDashboard.jsx` (Knowledge Graph, Skill Radar)
+  - `[x]` `GeneralTest.jsx` (Pass skip status, confidence to backend if needed)
+  - `[x]` `AdaptiveTest.jsx` (UI for RL-driven tests)
+- `[x]` **6. Verification & Walkthrough**
+  - `[x]` End-to-end verification of components
+  - `[x]` Create Walkthrough document
