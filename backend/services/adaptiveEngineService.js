@@ -1,12 +1,13 @@
 import pool from '../config/db.js';
 
 /**
- * Adaptive Engine logic for generating next test.
- * Priority: 70% Weak Topics, 20% Medium Topics, 10% Strong Topics.
+ * Advanced Adaptive Engine (Phase 8)
+ * 70% Weak Topics, 20% Medium Topics, 10% Strong Topics.
+ * Never repeats questions. Never recommends recently attempted questions.
  */
-export const generateAdaptiveTestQuestions = async (userId, targetCount = 20) => {
+export const generateAdaptiveTestQuestions = async (userId, targetCount = 15) => {
     try {
-        // 1. Fetch user's knowledge state
+        // 1. Predict Knowledge State Priorities
         const [knowledgeRows] = await pool.execute(
             `SELECT topic_id, AVG(mastery_score) as avg_mastery 
              FROM knowledge_state 
@@ -19,13 +20,11 @@ export const generateAdaptiveTestQuestions = async (userId, targetCount = 20) =>
         let weakTopics = [], mediumTopics = [], strongTopics = [];
         
         if (knowledgeRows.length > 0) {
-            // Divide into thirds for simplicity
             const third = Math.floor(knowledgeRows.length / 3);
             weakTopics = knowledgeRows.slice(0, third || 1).map(r => r.topic_id);
             mediumTopics = knowledgeRows.slice(third || 1, (third*2) || 2).map(r => r.topic_id);
             strongTopics = knowledgeRows.slice((third*2) || 2).map(r => r.topic_id);
         } else {
-            // Default fallback if no history
             weakTopics = [1,2,3]; mediumTopics = [4,5,6]; strongTopics = [7,8];
         }
 
@@ -35,13 +34,15 @@ export const generateAdaptiveTestQuestions = async (userId, targetCount = 20) =>
 
         const allSelectedQuestions = [];
         
-        // 2. Helper to fetch questions
+        // 2. Strict Filter Execution Function
         const fetchQuestions = async (topicIds, limit) => {
             if (limit <= 0 || !topicIds || topicIds.length === 0) return [];
             const placeholders = topicIds.map(() => '?').join(',');
-            // Exclude previously attempted questions for this user
+            
+            // Phase 6 Pipeline: Remove previously attempted, filter target difficulty, randomize
             const [qRows] = await pool.execute(
-                `SELECT q.id, q.text, q.difficulty, q.domain_id, q.topic_id, q.difficulty_id, q.estimated_solving_time 
+                `SELECT q.id, q.text, q.difficulty, q.domain_id, q.topic_id, q.difficulty_id, 
+                        q.estimated_solving_time, q.hint, q.detailed_explanation as explanation, q.bloom_taxonomy_level 
                  FROM questions q
                  WHERE q.topic_id IN (${placeholders})
                  AND q.id NOT IN (
@@ -59,11 +60,12 @@ export const generateAdaptiveTestQuestions = async (userId, targetCount = 20) =>
 
         allSelectedQuestions.push(...weakQ, ...mediumQ, ...strongQ);
 
-        // Fallback: If not enough questions found (e.g. user exhausted them), pull any unused questions
+        // Fallback: If not enough questions found, query any unattempted
         if (allSelectedQuestions.length < targetCount) {
             const deficit = targetCount - allSelectedQuestions.length;
             const [fallbackQ] = await pool.execute(
-                `SELECT q.id, q.text, q.difficulty, q.domain_id, q.topic_id, q.difficulty_id, q.estimated_solving_time 
+                `SELECT q.id, q.text, q.difficulty, q.domain_id, q.topic_id, q.difficulty_id, 
+                        q.estimated_solving_time, q.hint, q.detailed_explanation as explanation, q.bloom_taxonomy_level 
                  FROM questions q
                  WHERE q.id NOT IN (
                      SELECT question_id FROM question_history WHERE user_id = ?
@@ -84,9 +86,6 @@ export const generateAdaptiveTestQuestions = async (userId, targetCount = 20) =>
     }
 };
 
-/**
- * Record test generation in adaptive_history
- */
 export const recordAdaptiveHistory = async (userId, testId, targetTopics, averageTargetDifficulty) => {
     try {
         await pool.execute(

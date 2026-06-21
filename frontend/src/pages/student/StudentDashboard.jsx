@@ -60,6 +60,9 @@ const StudentDashboard = () => {
   const avgAccuracy = overview.avgAccuracy ? (parseFloat(overview.avgAccuracy) * 100).toFixed(0) : 0;
   const avgResponseTime = overview.avgResponseTime ? (parseFloat(overview.avgResponseTime) / 1000).toFixed(1) : 0;
   const currentLevel = dashboardData?.currentLevel || 'easy';
+  const behavior = dashboardData?.behavior || {};
+  const learningTrend = dashboardData?.profile?.learning_trend || 'stable';
+  const growthRate = dashboardData?.profile?.growth_rate || 0;
 
   return (
     <div className="space-y-6">
@@ -109,27 +112,48 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      {/* Topics & Engine Rewards */}
+      {/* Topics & Engine Rewards & V3 Behavior Analytics */}
       {dashboardData?.weakTopics && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mt-6">
           <GlassCard className="p-6">
-            <h3 className="font-bold mb-2 text-emerald-600">Strong Topics</h3>
+            <h3 className="font-bold mb-2 text-emerald-600 flex items-center gap-2"><CheckCircle size={16}/> Strong Topics</h3>
             <div className="flex flex-wrap gap-2">
               {dashboardData.strongTopics.map((t, i) => <span key={i} className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">{t}</span>)}
             </div>
-          </GlassCard>
-          <GlassCard className="p-6">
-            <h3 className="font-bold mb-2 text-rose-600">Weak Topics</h3>
+            <h3 className="font-bold mb-2 mt-4 text-rose-600 flex items-center gap-2"><Target size={16}/> Weak Topics</h3>
             <div className="flex flex-wrap gap-2">
               {dashboardData.weakTopics.map((t, i) => <span key={i} className="bg-rose-100 text-rose-800 text-xs px-2 py-1 rounded">{t}</span>)}
             </div>
           </GlassCard>
+
           <GlassCard className="p-6">
-            <h3 className="font-bold mb-2 text-indigo-600">Engine Stats</h3>
-            <p className="text-sm">Total RL Reward Score: <span className="font-bold text-lg">{dashboardData.rewardScore?.toFixed(2)}</span></p>
-            <p className="text-sm mt-2">Next Recommended:</p>
+            <h3 className="font-bold mb-2 text-indigo-600 flex items-center gap-2"><BrainCircuit size={16}/> V3 RL Engine</h3>
+            <p className="text-sm">Total Reward Score: <span className="font-bold text-lg">{dashboardData.rewardScore?.toFixed(2)}</span></p>
+            <p className="text-sm mt-4">Next Suggested Focus:</p>
             <div className="flex flex-wrap gap-1 mt-1">
-              {dashboardData.nextRecommended.map((t, i) => <span key={i} className="text-xs text-slate-500">{t}</span>)}
+              {dashboardData.nextRecommended.map((t, i) => <span key={i} className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">{t}</span>)}
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-6 xl:col-span-2">
+            <h3 className="font-bold mb-4 text-amber-600 flex items-center gap-2"><Activity size={16}/> Cognitive & Behavioral Profile (V3.0)</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/10 text-center">
+                <p className="text-xs text-slate-500 font-medium">Trend</p>
+                <p className="text-lg font-black uppercase text-blue-500 mt-1">{learningTrend.replace('_', ' ')}</p>
+              </div>
+              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/10 text-center">
+                <p className="text-xs text-slate-500 font-medium">Attention</p>
+                <p className="text-lg font-black text-amber-500 mt-1">{(behavior.attention_score * 100).toFixed(0)}%</p>
+              </div>
+              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/10 text-center">
+                <p className="text-xs text-slate-500 font-medium">Rapid Guessing</p>
+                <p className="text-lg font-black text-rose-500 mt-1">{behavior.rapid_guessing_count || 0}</p>
+              </div>
+              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/10 text-center">
+                <p className="text-xs text-slate-500 font-medium">Discipline</p>
+                <p className="text-lg font-black text-emerald-500 mt-1">{(behavior.learning_discipline * 100).toFixed(0)}%</p>
+              </div>
             </div>
           </GlassCard>
         </div>

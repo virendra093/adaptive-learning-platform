@@ -53,6 +53,13 @@ export const getStudentDashboardMetrics = async (userId) => {
         // Next recommended topics -> Weakest topics
         const nextRecommended = [...weakTopics].slice(0, 3);
 
+        // 6. Fetch Latest Behavior Metrics (V3)
+        const [behaviorRows] = await pool.execute(
+            `SELECT * FROM behavior_metrics WHERE user_id = ? ORDER BY createdAt DESC LIMIT 1`,
+            [userId]
+        );
+        const behavior = behaviorRows[0] || { attention_score: 1.0, persistence_score: 1.0, learning_discipline: 1.0 };
+
         return {
             profile,
             radarData: radarRows,
@@ -60,7 +67,8 @@ export const getStudentDashboardMetrics = async (userId) => {
             rewardScore,
             strongTopics,
             weakTopics,
-            nextRecommended
+            nextRecommended,
+            behavior
         };
 
     } catch (error) {

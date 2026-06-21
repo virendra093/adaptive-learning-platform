@@ -6,6 +6,7 @@ import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import RoleRoute from './components/common/RoleRoute';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Lazy load all pages for better performance (Code Splitting)
 const LandingPage = React.lazy(() => import('./pages/public/LandingPage'));
@@ -37,8 +38,9 @@ function App() {
       <Router>
         <div className="min-h-screen text-slate-900 dark:text-slate-100 font-sans">
           <Toaster position="top-right" />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               
@@ -71,8 +73,9 @@ function App() {
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </Router>
     </AuthProvider>

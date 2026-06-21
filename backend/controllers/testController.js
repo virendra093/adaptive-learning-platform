@@ -3,6 +3,8 @@ import { updateKnowledgeState } from '../services/knowledgeTrackingService.js';
 import { calculateRewardAndUpdatePolicy, determineDifficultyAdjustment } from '../services/rewardEngineService.js';
 import { generateAdaptiveTestQuestions, recordAdaptiveHistory } from '../services/adaptiveEngineService.js';
 import { getStudentDashboardMetrics, snapshotLearningProgress } from '../services/studentAnalyticsService.js';
+import { analyzeTestBehavior, updateQuestionStatistics } from '../services/behaviorAnalysisService.js';
+import { analyzeLearningTrend } from '../services/learningTrendService.js';
 import { getQuestionOptions } from '../models/Question.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
@@ -94,9 +96,10 @@ export const submitTest = async (req, res, next) => {
               userId, response.isCorrect, response.responseTimeMs, (q.estimated_solving_time || 30) * 1000, wasSkipped
           );
 
-          // 2. DKT Knowledge tracking
+          // 2. DKT Knowledge tracking (V3.0)
           await updateKnowledgeState(
-              userId, q.domain_id, q.topic_id, q.difficulty_id, response.isCorrect, response.responseTimeMs, (q.estimated_solving_time || 30) * 1000, wasSkipped
+              userId, q.domain_id, q.topic_id, q.difficulty_id, response.isCorrect, response.responseTimeMs, 
+              (q.estimated_solving_time || 30) * 1000, wasSkipped, false, q.weight || 1.0, 1.0
           );
 
           // 3. Question History V2
@@ -116,6 +119,11 @@ export const submitTest = async (req, res, next) => {
     
     // Create daily snapshot of progress
     await snapshotLearningProgress(userId);
+
+    // Continuous Evaluation Pipeline (V3.0)
+    const behaviorMetrics = await analyzeTestBehavior(userId, testId, responses);
+    await updateQuestionStatistics(responses);
+    const learningTrend = await analyzeLearningTrend(userId);
 
     const nextDifficulty = await determineDifficultyAdjustment(userId);
     let diffStr = nextDifficulty === 'increase' ? 'hard' : (nextDifficulty === 'decrease' ? 'easy' : 'medium');

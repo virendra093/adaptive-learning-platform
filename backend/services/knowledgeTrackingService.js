@@ -1,12 +1,14 @@
 import pool from '../config/db.js';
 
 /**
- * Lightweight DKT-inspired knowledge tracking.
- * Updates the knowledge_state table based on student performance.
+ * Advanced DKT-inspired Knowledge Tracking Engine (V3.0)
+ * Evaluates continuous mastery utilizing multi-dimensional cognitive vectors.
  */
-export const updateKnowledgeState = async (userId, domainId, topicId, difficultyId, isCorrect, responseTimeMs, expectedTimeMs = 30000, wasSkipped = false) => {
+export const updateKnowledgeState = async (
+    userId, domainId, topicId, difficultyId, isCorrect, responseTimeMs, expectedTimeMs = 30000, 
+    wasSkipped = false, hintUsed = false, questionWeight = 1.0, behaviorScore = 1.0
+) => {
     try {
-        // 1. Fetch current state or initialize
         const [rows] = await pool.execute(
             `SELECT mastery_score, attempts, correct_attempts FROM knowledge_state 
              WHERE user_id = ? AND topic_id = ? AND difficulty_id = ?`,
@@ -22,7 +24,6 @@ export const updateKnowledgeState = async (userId, domainId, topicId, difficulty
             attempts = parseInt(rows[0].attempts);
             correctAttempts = parseInt(rows[0].correct_attempts);
         } else {
-            // Initialize if not exists
             await pool.execute(
                 `INSERT IGNORE INTO knowledge_state (user_id, domain_id, topic_id, difficulty_id, mastery_score)
                  VALUES (?, ?, ?, ?, ?)`,
@@ -30,41 +31,50 @@ export const updateKnowledgeState = async (userId, domainId, topicId, difficulty
             );
         }
 
-        // 2. Calculate adjustments
         attempts++;
         if (isCorrect && !wasSkipped) correctAttempts++;
 
-        let adjustment = 0;
+        let adjustment = 0.0;
+        const diffMultiplier = difficultyId === 3 ? 1.5 : (difficultyId === 1 ? 0.8 : 1.0);
 
         if (wasSkipped) {
-            adjustment = -2.0; // Penalty for skipping
+            adjustment -= 3.0 * questionWeight * diffMultiplier;
         } else if (isCorrect) {
-            adjustment += 2.0; // Base correct
-            // Speed bonus
-            if (responseTimeMs < expectedTimeMs * 0.8) {
-                adjustment += 1.0; 
+            adjustment += 5.0 * questionWeight * diffMultiplier;
+            
+            // Speed Bonus / Penalty
+            if (responseTimeMs < expectedTimeMs * 0.5) {
+                adjustment += 2.0; // Fluent mastery
             } else if (responseTimeMs > expectedTimeMs * 1.5) {
-                adjustment -= 0.5; // Slight penalty for taking too long even if correct
+                adjustment -= 1.5; // Struggled but succeeded
             }
         } else {
-            adjustment -= 2.0; // Base wrong
-            // Careless mistake penalty (wrong but answered super fast)
-            if (responseTimeMs < expectedTimeMs * 0.3) {
-                adjustment -= 1.0; 
+            adjustment -= 5.0 * questionWeight * diffMultiplier;
+            
+            // Rapid Guessing Penalty
+            if (responseTimeMs < expectedTimeMs * 0.2) {
+                adjustment -= 3.0; 
             }
         }
 
-        // 3. Repeated mistakes check
-        const correctnessRatio = correctAttempts / attempts;
-        if (!isCorrect && correctnessRatio < 0.3 && attempts > 3) {
-            adjustment -= 1.5; // Compounding penalty for failing this topic repeatedly
+        if (hintUsed) {
+            adjustment *= 0.6; // Reduced reward if hint was used
         }
 
-        // Apply and bound between 0 and 100
-        mastery += adjustment;
+        // Apply behavior multiplier (Discipline, persistence)
+        adjustment *= behaviorScore;
+
+        // Bounded Learning Growth Formula
+        if (adjustment > 0) {
+            // Harder to gain mastery as you approach 100
+            mastery += adjustment * ((100 - mastery) / 100);
+        } else {
+            // Easier to lose mastery if you are highly rated
+            mastery += adjustment * (mastery / 100);
+        }
+
         mastery = Math.max(0.0, Math.min(100.0, mastery));
 
-        // 4. Save to DB
         await pool.execute(
             `UPDATE knowledge_state 
              SET mastery_score = ?, attempts = ?, correct_attempts = ?
@@ -72,7 +82,6 @@ export const updateKnowledgeState = async (userId, domainId, topicId, difficulty
             [mastery, attempts, correctAttempts, userId, topicId, difficultyId]
         );
 
-        // 5. Update overall knowledge_score in student_profile
         await updateOverallKnowledgeScore(userId);
 
         return mastery;
