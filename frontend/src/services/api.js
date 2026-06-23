@@ -1,8 +1,10 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: API_URL,
   withCredentials: true, // Important for HttpOnly cookies
 });
 
@@ -28,7 +30,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await axios.post('http://localhost:5000/api/auth/refresh', {}, { withCredentials: true });
+        const res = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
         
         if (res.data?.data?.token) {
           const newToken = res.data.data.token;
