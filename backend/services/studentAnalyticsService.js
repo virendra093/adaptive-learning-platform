@@ -9,6 +9,10 @@ export const getStudentDashboardMetrics = async (userId) => {
         );
         let profile = profileRows[0] || {};
 
+        if (!profile.general_assessment_completed) {
+            return { profile };
+        }
+
         // 2. Fetch Knowledge Radar Data (Domain Mastery)
         const [radarRows] = await pool.execute(
             `SELECT d.name as domain, AVG(k.mastery_score) as mastery
@@ -60,6 +64,26 @@ export const getStudentDashboardMetrics = async (userId) => {
         );
         const behavior = behaviorRows[0] || { attention_score: 1.0, persistence_score: 1.0, learning_discipline: 1.0 };
 
+        // 7. V4 Metrics
+        const [personaRows] = await pool.execute(`SELECT * FROM learning_persona WHERE user_id = ? ORDER BY generated_at DESC LIMIT 1`, [userId]);
+        const [interestRows] = await pool.execute(
+            `SELECT si.*, d.name as domain_name, t.name as topic_name 
+             FROM student_interest si
+             LEFT JOIN domains d ON si.preferred_domain_id = d.id
+             LEFT JOIN topics t ON si.preferred_topic_id = t.id
+             WHERE si.user_id = ? ORDER BY si.last_updated DESC LIMIT 1`, [userId]
+        );
+        const [confidenceRows] = await pool.execute(`SELECT * FROM confidence_history WHERE user_id = ? ORDER BY calculated_at DESC LIMIT 10`, [userId]);
+        const [goalRows] = await pool.execute(`SELECT * FROM goal_progress WHERE user_id = ? ORDER BY updatedAt DESC LIMIT 1`, [userId]);
+        const [pathRows] = await pool.execute(`SELECT * FROM learning_path WHERE user_id = ? ORDER BY generated_at DESC LIMIT 1`, [userId]);
+
+        const persona = personaRows[0] || null;
+        const interest = interestRows[0] || null;
+        const confidenceHistory = confidenceRows.reverse(); // oldest to newest
+        const goalProgress = goalRows[0] || null;
+        const learningPath = pathRows[0] ? JSON.parse(pathRows[0].roadmap_json) : null;
+        const estimatedImprovement = pathRows[0]?.estimated_improvement || 0;
+
         return {
             profile,
             radarData: radarRows,
@@ -68,7 +92,13 @@ export const getStudentDashboardMetrics = async (userId) => {
             strongTopics,
             weakTopics,
             nextRecommended,
-            behavior
+            behavior,
+            persona,
+            interest,
+            confidenceHistory,
+            goalProgress,
+            learningPath,
+            estimatedImprovement
         };
 
     } catch (error) {

@@ -1,0 +1,36 @@
+{
+  "id": "reason_syllogism_01",
+  "domain": "Logical Reasoning",
+  "domain_id": 2,
+  "topic": "Syllogism",
+  "topic_id": 8,
+  "subtopic": "All and Some",
+  "blueprint_json": {
+    "variables": {
+      "cat1": "['Cats', 'Dogs', 'Birds', 'Lions'][Math.floor(Math.random()*4)]",
+      "cat2": "['Cars', 'Planes', 'Boats', 'Trains'][Math.floor(Math.random()*4)]",
+      "cat3": "['Trees', 'Flowers', 'Bushes', 'Grass'][Math.floor(Math.random()*4)]"
+    },
+    "questionTemplate": "Statements:\n1. All {{cat1}} are {{cat2}}.\n2. Some {{cat2}} are {{cat3}}.\n\nConclusion: Some {{cat1}} are {{cat3}}.\nIs the conclusion valid?",
+    "correctAnswerTemplate": "Cannot be determined",
+    "distractorsTemplate": [
+      "Valid",
+      "Invalid",
+      "Both Valid and Invalid"
+    ],
+    "explanationRules": {
+      "formula": "Venn Diagram Overlaps",
+      "concept": "Syllogism (All + Some)",
+      "step_by_step": "1. Draw a circle for {{cat1}} fully inside {{cat2}}.\n2. Draw a circle for {{cat3}} intersecting {{cat2}}.\n3. The intersection of {{cat3}} and {{cat2}} does NOT necessarily overlap with {{cat1}}.\n4. Therefore, it is possible but not guaranteed.",
+      "shortcut": "If 'Some B are C', it doesn't guarantee 'Some A are C' even if 'All A are B'.",
+      "common_mistake": "Assuming that because A is in B, and C touches B, C must touch A.",
+      "interview_tip": "Always draw Venn diagrams to avoid mental leaps in logic."
+    },
+    "difficultyRules": {
+      "easy": "false",
+      "medium": "true",
+      "hard": "false"
+    },
+    "hintTemplate": "Draw a Venn Diagram. Is it possible to draw it where the first and third groups do NOT touch?"
+  }
+}

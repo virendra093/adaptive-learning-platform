@@ -1,0 +1,35 @@
+{
+  "id": "quant_percentages_01",
+  "domain": "Quantitative Aptitude",
+  "domain_id": 1,
+  "topic": "Percentages",
+  "topic_id": 3,
+  "subtopic": "Basic Percentage Calculation",
+  "blueprint_json": {
+    "variables": {
+      "base": "Math.floor(Math.random() * 50) * 10 + 100",
+      "percent": "Math.floor(Math.random() * 8) * 5 + 10"
+    },
+    "questionTemplate": "What is {{percent}}% of {{base}}?",
+    "correctAnswerTemplate": "{{ (percent / 100) * base }}",
+    "distractorsTemplate": [
+      "{{ ((percent + 10) / 100) * base }}",
+      "{{ ((percent - 10) / 100) * base }}",
+      "{{ (percent / 100) * (base + 50) }}"
+    ],
+    "explanationRules": {
+      "formula": "Percentage = (P / 100) * Base",
+      "concept": "Percentages",
+      "step_by_step": "1. The formula is ({{percent}} / 100) * {{base}}.\n2. Calculate the fraction: {{percent/100}}.\n3. Multiply: {{percent/100}} * {{base}} = {{ (percent/100)*base }}.",
+      "shortcut": "Convert the percentage to a decimal and multiply.",
+      "common_mistake": "Dividing the base by the percentage instead of multiplying.",
+      "interview_tip": "Percentages are foundational for Data Interpretation questions."
+    },
+    "difficultyRules": {
+      "easy": "percent % 10 === 0",
+      "medium": "percent % 10 !== 0",
+      "hard": "false"
+    },
+    "hintTemplate": "Convert {{percent}}% to a decimal or fraction first."
+  }
+}

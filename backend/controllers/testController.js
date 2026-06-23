@@ -5,6 +5,12 @@ import { generateAdaptiveTestQuestions, recordAdaptiveHistory } from '../service
 import { getStudentDashboardMetrics, snapshotLearningProgress } from '../services/studentAnalyticsService.js';
 import { analyzeTestBehavior, updateQuestionStatistics } from '../services/behaviorAnalysisService.js';
 import { analyzeLearningTrend } from '../services/learningTrendService.js';
+import { updateLearningPersona } from '../services/learningPersonaService.js';
+import { updateStudentInterest } from '../services/studentInterestService.js';
+import { updateConfidenceEstimation } from '../services/confidenceEstimationService.js';
+import { updateLearningPath } from '../services/learningPathService.js';
+import { generateExplanation } from '../services/explainableAIService.js';
+import { updateGoalProgress } from '../services/learningGoalService.js';
 import { getQuestionOptions } from '../models/Question.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
@@ -41,10 +47,10 @@ export const generateGeneralTest = async (req, res, next) => {
   }
 };
 
-// Generate 15-20 questions for Adaptive Test based on Knowledge Profile
+// Generate 15 questions for Adaptive Test based on Knowledge Profile (V4.0 requirement)
 export const generateAdaptiveTest = async (req, res, next) => {
   try {
-    const targetCount = 20;
+    const targetCount = 15;
     const { questions, targetTopics } = await generateAdaptiveTestQuestions(req.user.id, targetCount);
     
     for (let q of questions) {
@@ -117,6 +123,22 @@ export const submitTest = async (req, res, next) => {
     // Update basic results table
     await saveResult(testId, userId, stats.correct * 10, stats.accuracy, stats.avgTime);
     
+    // Check if test was general, update profile
+    const [testRows] = await pool.execute('SELECT test_type FROM tests WHERE id = ?', [testId]);
+    if (testRows.length > 0 && testRows[0].test_type === 'general') {
+        await pool.execute(
+            `INSERT INTO student_profile (user_id, general_assessment_completed, general_test_score, general_assessment_completed_at, initial_profile_generated, adaptive_access_enabled) 
+             VALUES (?, TRUE, ?, NOW(), TRUE, TRUE)
+             ON DUPLICATE KEY UPDATE 
+             general_assessment_completed = TRUE, 
+             general_test_score = ?, 
+             general_assessment_completed_at = NOW(), 
+             initial_profile_generated = TRUE, 
+             adaptive_access_enabled = TRUE`, 
+            [userId, stats.accuracy * 100, stats.accuracy * 100]
+        );
+    }
+    
     // Create daily snapshot of progress
     await snapshotLearningProgress(userId);
 
@@ -125,9 +147,28 @@ export const submitTest = async (req, res, next) => {
     await updateQuestionStatistics(responses);
     const learningTrend = await analyzeLearningTrend(userId);
 
+    // Module 1: Update Learning Persona based on new behavior metrics
+    await updateLearningPersona(userId);
+
+    // Module 2: Update Student Interest Detection
+    await updateStudentInterest(userId);
+
+    // Module 3: Update Confidence Estimation
+    await updateConfidenceEstimation(userId, testId, responses);
+
+    // Module 4: Update Learning Path
+    await updateLearningPath(userId);
+
+    // Module 8: Update Goal Progress
+    await updateGoalProgress(userId);
+
     const nextDifficulty = await determineDifficultyAdjustment(userId);
     let diffStr = nextDifficulty === 'increase' ? 'hard' : (nextDifficulty === 'decrease' ? 'easy' : 'medium');
-    const explanation = `Your reward score dictates a ${nextDifficulty} in difficulty.`;
+    
+    // Module 7: Generate AI Explanation
+    // Note: We don't have the explicit targetTopics for adaptive history available here natively if it's general test,
+    // so we pass null, the service will handle it.
+    const explanation = await generateExplanation(userId, testId, diffStr, null);
     
     await saveRecommendation(userId, testId, diffStr, explanation);
     

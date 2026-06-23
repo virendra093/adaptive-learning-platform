@@ -1,0 +1,34 @@
+{
+  "id": "quantitative_data_interpretation_bp",
+  "domain": "Quantitative Aptitude",
+  "domain_id": 1,
+  "topic": "Data Interpretation",
+  "topic_id": 25,
+  "subtopic": "General Pattern",
+  "blueprint_json": {
+    "variables": {
+      "x": "Math.floor(Math.random() * 10) + 1"
+    },
+    "questionTemplate": "[Placeholder for Data Interpretation] If x is {{x}}, what is x?",
+    "correctAnswerTemplate": "{{x}}",
+    "distractorsTemplate": [
+      "{{x+1}}",
+      "{{x-1}}",
+      "{{x+2}}"
+    ],
+    "explanationRules": {
+      "formula": "N/A",
+      "concept": "Data Interpretation",
+      "step_by_step": "1. TBD",
+      "shortcut": "TBD",
+      "common_mistake": "TBD",
+      "interview_tip": "TBD"
+    },
+    "difficultyRules": {
+      "easy": "x < 4",
+      "medium": "x >= 4 && x < 8",
+      "hard": "x >= 8"
+    },
+    "hintTemplate": "TBD"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "verbal_grammar_01",
+  "domain": "Verbal Ability",
+  "domain_id": 3,
+  "topic": "Grammar",
+  "topic_id": 5,
+  "subtopic": "Subject-Verb Agreement",
+  "blueprint_json": {
+    "variables": {
+      "subject": "['The manager', 'The professor', 'The committee', 'The team'][Math.floor(Math.random()*4)]",
+      "verbSingular": "['has', 'is', 'was', 'does'][Math.floor(Math.random()*4)]",
+      "object": "['decided to proceed', 'going to the meeting', 'planning a strategy'][Math.floor(Math.random()*3)]"
+    },
+    "questionTemplate": "Choose the grammatically correct option to complete the sentence: {{subject}} _____ {{object}}.",
+    "correctAnswerTemplate": "{{verbSingular}}",
+    "distractorsTemplate": [
+      "{{ verbSingular === 'has' ? 'have' : (verbSingular === 'is' ? 'are' : (verbSingular === 'was' ? 'were' : 'do')) }}",
+      "{{ verbSingular === 'has' ? 'having' : 'being' }}",
+      "{{ verbSingular === 'does' ? 'did' : 'will' }}"
+    ],
+    "explanationRules": {
+      "formula": "Collective Noun + Singular Verb",
+      "concept": "Subject-Verb Agreement",
+      "step_by_step": "1. Identify the subject: '{{subject}}'.\n2. Note that it is treated as a single collective entity.\n3. A singular entity requires a singular verb.\n4. Therefore, '{{verbSingular}}' is correct.",
+      "shortcut": "Treat collective groups as a single unit unless the sentence emphasizes individual members.",
+      "common_mistake": "Using a plural verb because the collective noun implies multiple people.",
+      "interview_tip": "Watch out for 'committee', 'team', and 'jury'—they are classic traps in verbal aptitude tests."
+    },
+    "difficultyRules": {
+      "easy": "true",
+      "medium": "false",
+      "hard": "false"
+    },
+    "hintTemplate": "Is the subject acting as one single unit or multiple distinct individuals?"
+  }
+}

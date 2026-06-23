@@ -13,6 +13,7 @@ import testRoutes from './routes/testRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import logger from './utils/logger.js';
 
@@ -52,6 +53,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/support', supportRoutes);
 
 // Test DB Connection
 app.get('/api/health', async (req, res) => {

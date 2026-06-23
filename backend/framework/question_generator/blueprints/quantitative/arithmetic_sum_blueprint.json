@@ -1,0 +1,34 @@
+{
+  "id": "quant_arith_progression_01",
+  "domain": "Quantitative Aptitude",
+  "domain_id": 1,
+  "topic": "Arithmetic",
+  "topic_id": 3,
+  "subtopic": "Arithmetic Progression Series",
+  "blueprint_json": {
+    "variables": {
+      "n": "Math.floor(Math.random() * 80) + 20"
+    },
+    "questionTemplate": "What is the sum of the first {{n}} natural numbers?",
+    "correctAnswerTemplate": "{{ (n * (n + 1)) / 2 }}",
+    "distractorsTemplate": [
+      "{{ ((n * (n + 1)) / 2) - n }}",
+      "{{ ((n * (n + 1)) / 2) + n }}",
+      "{{ (n * n) / 2 }}"
+    ],
+    "explanationRules": {
+      "formula": "S = n(n+1)/2",
+      "concept": "Arithmetic Progression Series",
+      "step_by_step": "1. Identify n = {{n}}.\n2. Apply formula S = {{n}}({{n}}+1)/2.\n3. S = {{n}}({{n+1}})/2 = {{n * (n+1)}} / 2 = {{ (n * (n + 1)) / 2 }}.",
+      "shortcut": "If n is even, divide n by 2 first and multiply by (n+1) to speed up mental math.",
+      "common_mistake": "Using n(n-1)/2 or forgetting to divide by 2.",
+      "interview_tip": "This pattern frequently appears in 'handshake' problems."
+    },
+    "difficultyRules": {
+      "easy": "n <= 40",
+      "medium": "n > 40 && n <= 80",
+      "hard": "n > 80"
+    },
+    "hintTemplate": "Think about the formula for the sum of an arithmetic progression. What is n in this case?"
+  }
+}

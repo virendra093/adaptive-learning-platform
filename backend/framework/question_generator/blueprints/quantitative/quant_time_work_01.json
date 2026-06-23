@@ -1,0 +1,35 @@
+{
+  "id": "quant_time_work_01",
+  "domain": "Quantitative Aptitude",
+  "domain_id": 1,
+  "topic": "Time and Work",
+  "topic_id": 3,
+  "subtopic": "Two Person Synergy",
+  "blueprint_json": {
+    "variables": {
+      "aDays": "Math.floor(Math.random() * 5 + 2) * 5",
+      "bDays": "Math.floor(Math.random() * 5 + 3) * 5"
+    },
+    "questionTemplate": "If A can complete a project in {{aDays}} days and B can complete the same project in {{bDays}} days, how many days will it take them working together?",
+    "correctAnswerTemplate": "{{ parseFloat(((aDays * bDays) / (aDays + bDays)).toFixed(2)) }} days",
+    "distractorsTemplate": [
+      "{{ parseFloat(((aDays + bDays) / 2).toFixed(2)) }} days",
+      "{{ parseFloat(Math.abs(aDays - bDays).toFixed(2)) }} days",
+      "{{ parseFloat((((aDays * bDays) / (aDays + bDays)) + 2).toFixed(2)) }} days"
+    ],
+    "explanationRules": {
+      "formula": "Together Time = (A * B) / (A + B)",
+      "concept": "Time and Work Rates",
+      "step_by_step": "1. A's 1-day work = 1/{{aDays}}.\n2. B's 1-day work = 1/{{bDays}}.\n3. Together 1-day work = (1/{{aDays}}) + (1/{{bDays}}) = ({{aDays}} + {{bDays}}) / ({{aDays}} * {{bDays}}).\n4. Total time is the reciprocal: ({{aDays * bDays}}) / ({{aDays + bDays}}) = {{ parseFloat(((aDays * bDays) / (aDays + bDays)).toFixed(2)) }}.",
+      "shortcut": "Use the direct formula (A*B)/(A+B) for two people.",
+      "common_mistake": "Simply taking the average of their days: (A+B)/2.",
+      "interview_tip": "Always convert 'days to complete' into 'work done per day' (rates)."
+    },
+    "difficultyRules": {
+      "easy": "(aDays * bDays) % (aDays + bDays) === 0",
+      "medium": "(aDays * bDays) % (aDays + bDays) !== 0",
+      "hard": "false"
+    },
+    "hintTemplate": "Calculate what fraction of the work each person completes in a single day."
+  }
+}

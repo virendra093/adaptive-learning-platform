@@ -1,0 +1,34 @@
+{
+  "id": "quantitative_coordinate_geometry_bp",
+  "domain": "Quantitative Aptitude",
+  "domain_id": 1,
+  "topic": "Coordinate Geometry",
+  "topic_id": 29,
+  "subtopic": "General Pattern",
+  "blueprint_json": {
+    "variables": {
+      "x": "Math.floor(Math.random() * 10) + 1"
+    },
+    "questionTemplate": "[Placeholder for Coordinate Geometry] If x is {{x}}, what is x?",
+    "correctAnswerTemplate": "{{x}}",
+    "distractorsTemplate": [
+      "{{x+1}}",
+      "{{x-1}}",
+      "{{x+2}}"
+    ],
+    "explanationRules": {
+      "formula": "N/A",
+      "concept": "Coordinate Geometry",
+      "step_by_step": "1. TBD",
+      "shortcut": "TBD",
+      "common_mistake": "TBD",
+      "interview_tip": "TBD"
+    },
+    "difficultyRules": {
+      "easy": "x < 4",
+      "medium": "x >= 4 && x < 8",
+      "hard": "x >= 8"
+    },
+    "hintTemplate": "TBD"
+  }
+}

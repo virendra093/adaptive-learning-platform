@@ -24,3 +24,19 @@ export const admin = (req, res, next) => {
     next(new ApiError(403, 'Not authorized as an admin'));
   }
 };
+
+import pool from '../config/db.js';
+
+export const requireGeneralTest = async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute('SELECT general_assessment_completed FROM student_profile WHERE user_id = ?', [req.user.id]);
+    if (rows.length > 0 && rows[0].general_assessment_completed) {
+      next();
+    } else {
+      next(new ApiError(403, 'General Assessment must be completed before accessing Adaptive Learning.'));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+

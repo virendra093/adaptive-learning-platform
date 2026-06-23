@@ -19,11 +19,16 @@ const AdaptiveTest = React.lazy(() => import('./pages/student/AdaptiveTest'));
 const TestResult = React.lazy(() => import('./pages/student/TestResult'));
 const Recommendations = React.lazy(() => import('./pages/student/Recommendations'));
 const Profile = React.lazy(() => import('./pages/student/Profile'));
+const FeedbackPage = React.lazy(() => import('./pages/student/FeedbackPage'));
+const SupportTicketsPage = React.lazy(() => import('./pages/student/SupportTicketsPage'));
 
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
 const QuestionManagement = React.lazy(() => import('./pages/admin/QuestionManagement'));
 const StudentList = React.lazy(() => import('./pages/admin/StudentList'));
 const ResultsList = React.lazy(() => import('./pages/admin/ResultsList'));
+const AdminFeedback = React.lazy(() => import('./pages/admin/AdminFeedback'));
+const AdminTickets = React.lazy(() => import('./pages/admin/AdminTickets'));
+const StudentIntelligenceDashboard = React.lazy(() => import('./pages/admin/student-intelligence/StudentIntelligenceDashboard'));
 
 // Fallback loader while lazy components load
 const PageLoader = () => (
@@ -60,6 +65,8 @@ function App() {
                     <Route path="/student/test/result" element={<TestResult />} />
                     <Route path="/student/recommendations" element={<Recommendations />} />
                     <Route path="/student/profile" element={<Profile />} />
+                    <Route path="/student/feedback" element={<FeedbackPage />} />
+                    <Route path="/student/support" element={<SupportTicketsPage />} />
                   </Route>
 
                   {/* Admin Routes */}
@@ -67,7 +74,10 @@ function App() {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/questions" element={<QuestionManagement />} />
                     <Route path="/admin/students" element={<StudentList />} />
+                    <Route path="/admin/students/:id" element={<StudentIntelligenceDashboard />} />
                     <Route path="/admin/results" element={<ResultsList />} />
+                    <Route path="/admin/feedback" element={<AdminFeedback />} />
+                    <Route path="/admin/tickets" element={<AdminTickets />} />
                   </Route>
                 </Route>
               </Route>

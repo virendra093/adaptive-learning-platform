@@ -1,0 +1,34 @@
+{
+  "id": "reasoning_ranking_bp",
+  "domain": "Logical Reasoning",
+  "domain_id": 2,
+  "topic": "Ranking",
+  "topic_id": 16,
+  "subtopic": "General Pattern",
+  "blueprint_json": {
+    "variables": {
+      "x": "Math.floor(Math.random() * 10) + 1"
+    },
+    "questionTemplate": "[Placeholder for Ranking] If x is {{x}}, what is x?",
+    "correctAnswerTemplate": "{{x}}",
+    "distractorsTemplate": [
+      "{{x+1}}",
+      "{{x-1}}",
+      "{{x+2}}"
+    ],
+    "explanationRules": {
+      "formula": "N/A",
+      "concept": "Ranking",
+      "step_by_step": "1. TBD",
+      "shortcut": "TBD",
+      "common_mistake": "TBD",
+      "interview_tip": "TBD"
+    },
+    "difficultyRules": {
+      "easy": "x < 4",
+      "medium": "x >= 4 && x < 8",
+      "hard": "x >= 8"
+    },
+    "hintTemplate": "TBD"
+  }
+}

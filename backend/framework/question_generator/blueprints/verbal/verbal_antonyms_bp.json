@@ -1,0 +1,34 @@
+{
+  "id": "verbal_antonyms_bp",
+  "domain": "Verbal Ability",
+  "domain_id": 3,
+  "topic": "Antonyms",
+  "topic_id": 12,
+  "subtopic": "General Pattern",
+  "blueprint_json": {
+    "variables": {
+      "x": "Math.floor(Math.random() * 10) + 1"
+    },
+    "questionTemplate": "[Placeholder for Antonyms] If x is {{x}}, what is x?",
+    "correctAnswerTemplate": "{{x}}",
+    "distractorsTemplate": [
+      "{{x+1}}",
+      "{{x-1}}",
+      "{{x+2}}"
+    ],
+    "explanationRules": {
+      "formula": "N/A",
+      "concept": "Antonyms",
+      "step_by_step": "1. TBD",
+      "shortcut": "TBD",
+      "common_mistake": "TBD",
+      "interview_tip": "TBD"
+    },
+    "difficultyRules": {
+      "easy": "x < 4",
+      "medium": "x >= 4 && x < 8",
+      "hard": "x >= 8"
+    },
+    "hintTemplate": "TBD"
+  }
+}

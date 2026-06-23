@@ -31,7 +31,8 @@ const sendTokenResponse = (user, statusCode, res, message) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token: accessToken
+      token: accessToken,
+      general_assessment_completed: user.general_assessment_completed ? 1 : 0
     }, message));
 };
 
@@ -49,7 +50,7 @@ export const registerUser = async (req, res, next) => {
 
     const userId = await createUser(name, email, hashedPassword, role || 'student');
     
-    sendTokenResponse({ id: userId, name, email, role: role || 'student' }, 201, res, "User registered successfully");
+    sendTokenResponse({ id: userId, name, email, role: role || 'student', general_assessment_completed: 0 }, 201, res, "User registered successfully");
   } catch (error) {
     next(error);
   }

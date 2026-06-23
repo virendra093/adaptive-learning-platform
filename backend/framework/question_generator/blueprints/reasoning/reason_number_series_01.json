@@ -1,0 +1,35 @@
+{
+  "id": "reason_number_series_01",
+  "domain": "Logical Reasoning",
+  "domain_id": 2,
+  "topic": "Number Series",
+  "topic_id": 7,
+  "subtopic": "Arithmetic Constant Difference",
+  "blueprint_json": {
+    "variables": {
+      "start": "Math.floor(Math.random() * 50) + 5",
+      "diff": "Math.floor(Math.random() * 12) + 3"
+    },
+    "questionTemplate": "Find the next number in the series: {{start}}, {{start + diff}}, {{start + diff*2}}, {{start + diff*3}}, ?",
+    "correctAnswerTemplate": "{{ start + diff*4 }}",
+    "distractorsTemplate": [
+      "{{ start + diff*5 }}",
+      "{{ start + diff*4 - 1 }}",
+      "{{ start + diff*3 + diff - 2 }}"
+    ],
+    "explanationRules": {
+      "formula": "N_n = Start + (n-1)*Diff",
+      "concept": "Arithmetic Sequence",
+      "step_by_step": "1. Check the difference between consecutive terms.\n2. {{start+diff}} - {{start}} = {{diff}}.\n3. The pattern adds {{diff}} each time.\n4. {{start + diff*3}} + {{diff}} = {{start + diff*4}}.",
+      "shortcut": "Identify the constant gap and add it to the last term.",
+      "common_mistake": "Adding the gap to the wrong term or miscalculating the gap.",
+      "interview_tip": "Quickly writing down the differences between terms is the best first step for any series problem."
+    },
+    "difficultyRules": {
+      "easy": "diff <= 5",
+      "medium": "diff > 5 && diff <= 10",
+      "hard": "diff > 10"
+    },
+    "hintTemplate": "What is the mathematical difference between the first two numbers?"
+  }
+}

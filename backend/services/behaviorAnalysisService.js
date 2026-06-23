@@ -95,15 +95,23 @@ export const updateQuestionStatistics = async (responses) => {
             const responseTime = r.responseTimeMs || 0;
 
             await pool.execute(
-                `INSERT INTO question_statistics (question_id, total_attempts, correct_attempts, avg_response_time, skip_rate, actual_accuracy)
-                 VALUES (?, 1, ?, ?, ?, ?)
+                `INSERT INTO question_statistics (question_id, total_attempts, correct_attempts, average_solving_time, skip_count)
+                 VALUES (?, 1, ?, ?, ?)
                  ON DUPLICATE KEY UPDATE 
                     total_attempts = total_attempts + 1,
                     correct_attempts = correct_attempts + VALUES(correct_attempts),
-                    avg_response_time = (avg_response_time * (total_attempts - 1) + VALUES(avg_response_time)) / total_attempts,
-                    skip_rate = ((skip_rate * (total_attempts - 1)) + VALUES(skip_rate)) / total_attempts,
-                    actual_accuracy = correct_attempts / total_attempts`,
-                [r.questionId, isCorrect, responseTime, isSkipped, isCorrect]
+                    average_solving_time = (average_solving_time * (total_attempts - 1) + VALUES(average_solving_time)) / total_attempts,
+                    skip_count = skip_count + VALUES(skip_count)`,
+                [r.questionId, isCorrect, responseTime, isSkipped]
+            );
+            
+            // Calculate discrimination_index dynamically later, or simple approximation here
+            // We can approximate difficulty_index = 1 - (correct_attempts / total_attempts)
+            await pool.execute(
+                `UPDATE question_statistics 
+                 SET difficulty_index = 1.0 - (correct_attempts / NULLIF(total_attempts, 0))
+                 WHERE question_id = ?`,
+                [r.questionId]
             );
         }
     } catch (error) {
