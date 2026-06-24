@@ -31,6 +31,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy is REQUIRED for Render so rate limiters see the real user IP, not the load balancer's IP
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -57,7 +60,7 @@ app.use(cookieParser());
 // Rate Limiting for Auth
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 auth requests per windowMs
+  max: 50, // Increased to 50 to allow classrooms/shared Wi-Fi
   message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' }
 });
 
