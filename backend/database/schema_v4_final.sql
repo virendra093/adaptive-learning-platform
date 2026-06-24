@@ -304,6 +304,7 @@ INSERT IGNORE INTO difficulties (name, weight) VALUES
 -- The following columns are added as NULLABLE so existing
 -- backend INSERT operations without them will not fail.
 
+/*
 ALTER TABLE questions
     ADD COLUMN domain_id INT NULL,
     ADD COLUMN topic_id INT NULL,
@@ -323,6 +324,7 @@ ALTER TABLE questions
     ADD CONSTRAINT fk_q_topic FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE SET NULL,
     ADD CONSTRAINT fk_q_subtopic FOREIGN KEY (subtopic_id) REFERENCES subtopics(id) ON DELETE SET NULL,
     ADD CONSTRAINT fk_q_diff FOREIGN KEY (difficulty_id) REFERENCES difficulties(id) ON DELETE SET NULL;
+*/
 
 -- ========================================================
 -- 3. ADAPTIVE ENGINE ANALYTICS & HISTORY TABLES
