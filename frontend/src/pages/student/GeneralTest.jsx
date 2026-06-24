@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import GlassCard from '../../components/common/GlassCard';
 import Button from '../../components/common/Button';
+import PostTestFeedbackModal from '../../components/features/PostTestFeedbackModal';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -14,6 +15,9 @@ const GeneralTest = () => {
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [testResultData, setTestResultData] = useState(null);
   
   const startTimeRef = useRef(0);
   const navigate = useNavigate();
@@ -71,18 +75,8 @@ const GeneralTest = () => {
       try {
         const { data } = await api.post('/tests/submit', { testId, responses: updatedResponses });
         toast.success("Test submitted successfully!");
-        const stats = data.data.stats || {};
-        navigate('/student/test/result', { 
-          state: { 
-            explanation: data.data.recommendation?.explanation || "Great effort! Keep practicing to master all topics.",
-            metrics: {
-              accuracy: stats.accuracy,
-              avgTime: stats.avgTime,
-              correct: stats.correct,
-              total: stats.total
-            }
-          } 
-        });
+        setTestResultData(data.data);
+        setShowFeedbackModal(true);
       } catch (error) {
         console.error(error);
         toast.error("Failed to submit test");
@@ -144,6 +138,15 @@ const GeneralTest = () => {
           </Button>
         </div>
       </GlassCard>
+
+      {showFeedbackModal && testResultData && (
+        <PostTestFeedbackModal 
+          isOpen={showFeedbackModal} 
+          onClose={() => setShowFeedbackModal(false)} 
+          testResult={testResultData} 
+          testType="general" 
+        />
+      )}
     </div>
   );
 };

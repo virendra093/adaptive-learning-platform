@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import GlassCard from '../../components/common/GlassCard';
 import Button from '../../components/common/Button';
+import PostTestFeedbackModal from '../../components/features/PostTestFeedbackModal';
 import { BrainCircuit, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -25,6 +26,9 @@ const AdaptiveTest = () => {
     wrongAnswers: 0,
     skippedQuestions: 0
   });
+
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [testResultData, setTestResultData] = useState(null);
 
   const startTimeRef = useRef(0);
   const [explanation, setExplanation] = useState("");
@@ -91,7 +95,12 @@ const AdaptiveTest = () => {
       try {
         const { data } = await api.post('/tests/submit', { testId, responses: updatedResponses });
         toast.success('Adaptive test completed successfully!');
-        navigate('/student/test/result', { state: { explanation: data.data.recommendation?.explanation, metrics: newMetrics } });
+        setTestResultData({
+          ...data.data,
+          metrics: newMetrics
+        });
+        setShowFeedbackModal(true);
+        setLoading(false);
       } catch (error) {
         console.error(error);
         toast.error("Failed to process test logic");
@@ -161,6 +170,15 @@ const AdaptiveTest = () => {
           </Button>
         </div>
       </GlassCard>
+
+      {showFeedbackModal && testResultData && (
+        <PostTestFeedbackModal 
+          isOpen={showFeedbackModal} 
+          onClose={() => setShowFeedbackModal(false)} 
+          testResult={testResultData} 
+          testType="adaptive" 
+        />
+      )}
     </div>
   );
 };
