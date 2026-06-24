@@ -1,14 +1,8 @@
 -- Schema update to support the new fields required for the aptitude question bank
 ALTER TABLE questions 
-ADD COLUMN IF NOT EXISTS domain VARCHAR(255) AFTER category,
-ADD COLUMN IF NOT EXISTS topic VARCHAR(255),
-ADD COLUMN IF NOT EXISTS subtopic VARCHAR(255),
-ADD COLUMN IF NOT EXISTS detailed_explanation TEXT,
-ADD COLUMN IF NOT EXISTS estimated_solving_time INT COMMENT 'in seconds',
-ADD COLUMN IF NOT EXISTS weightage INT DEFAULT 1,
-ADD COLUMN IF NOT EXISTS tags VARCHAR(255),
-ADD COLUMN IF NOT EXISTS hint TEXT,
-ADD COLUMN IF NOT EXISTS learning_objective TEXT;
+ADD COLUMN domain VARCHAR(255) AFTER category,
+ADD COLUMN topic VARCHAR(255),
+ADD COLUMN subtopic VARCHAR(255);
 
 -- Part 1: 20 Questions
 -- Domain: Quantitative Aptitude
