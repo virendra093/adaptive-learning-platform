@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, FileText, Activity, Settings, Users, BrainCircuit, MessageSquare, HelpCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user } = useAuth();
   
   const studentLinks = [
@@ -32,7 +32,23 @@ const Sidebar = () => {
   });
 
   return (
-    <aside className="w-64 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-xl border-r border-slate-200 dark:border-white/10 hidden md:flex flex-col">
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Content */}
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-50
+        w-64 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-xl 
+        border-r border-slate-200 dark:border-white/10 
+        flex flex-col transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
       <div className="p-6">
         <h1 className="text-xl font-bold text-gradient flex items-center gap-2">
           <BrainCircuit className="text-primary-500" />
@@ -54,7 +70,13 @@ const Sidebar = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
                 } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`
               }
-              onClick={(e) => isLocked && e.preventDefault()}
+              onClick={(e) => {
+                if (isLocked) {
+                  e.preventDefault();
+                } else if (window.innerWidth < 768) {
+                  setIsOpen(false);
+                }
+              }}
             >
               <div className="flex items-center gap-3">
                 <Icon size={20} />
@@ -65,7 +87,8 @@ const Sidebar = () => {
           );
         })}
       </nav>
-    </aside>
+      </aside>
+    </>
   );
 };
 
