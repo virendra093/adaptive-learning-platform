@@ -9,11 +9,29 @@ This chapter presents the architectural framework and system design of the AI-Dr
 ### 1. Professional Block Diagram
 ```mermaid
 flowchart LR
-    S((Student)) --> |Registration, Login, Test Answers| ALP[Adaptive Learning Platform]
-    ALP --> |Tests, Recommendations, Analytics| S
-    
-    A((Admin)) --> |Manage Questions, Monitor Platform| ALP
-    ALP --> |Student Analytics, Feedback| A
+    %% Entities
+    S((Student))
+    A((Administrator))
+    Sys[AI-Driven Adaptive Learning Platform]
+
+    %% Student Data Flows
+    S --> |1. Registration & Auth Data| Sys
+    S --> |2. Learning Goals & Preferences| Sys
+    S --> |3. Test Responses (Time, Accuracy)| Sys
+    S --> |4. Support Tickets & Feedback| Sys
+
+    Sys --> |5. Personalized UI & Dashboards| S
+    Sys --> |6. Adaptive Test Questions| S
+    Sys --> |7. Real-time Performance Feedback| S
+    Sys --> |8. Learning Pathways & Explanations| S
+
+    %% Admin Data Flows
+    A --> |9. Question Blueprints & Meta| Sys
+    A --> |10. System Configurations| Sys
+    A --> |11. Ticket Resolutions| Sys
+
+    Sys --> |12. Global Analytics & Reports| A
+    Sys --> |13. System Health Alerts| A
 ```
 
 ### 2. Diagram Explanation
@@ -39,34 +57,58 @@ Provides a non-technical, easily understandable overview of the system's purpose
 ### 1. Professional Block Diagram
 ```mermaid
 flowchart TD
-    S((Student))
-    A((Admin))
+    %% External Entities
+    Student((Student))
+    Admin((Admin))
     
-    subgraph System Modules
-        Auth[Authentication Module]
-        GenTest[General Test Module]
-        AdapTest[Adaptive Test Module]
-        RecEng[Recommendation Engine]
-        DB[(Central Database)]
-        Analyt[Analytics Module]
+    %% Main System Processes
+    subgraph Frontend [Presentation Layer]
+        ReactUI[React SPA]
+        DashUI[Analytics Dashboard]
     end
 
-    S --> |Credentials| Auth
-    Auth --> |Tokens| S
-    Auth --> |Verify| DB
+    subgraph Backend Core [Business & API Layer]
+        Auth[Authentication & AuthZ Module]
+        TestEng[Test Management Engine]
+        TicketEng[Support & Feedback Module]
+        AdminEng[Admin Management Module]
+    end
+
+    subgraph AI Layer [Intelligence & Analytics Layer]
+        AdapEng[Adaptive Decision Engine]
+        RecEng[Explainable AI & Recommendations]
+        AnalytEng[Continuous Evaluation Pipeline]
+    end
+
+    subgraph Storage [Data Persistence Layer]
+        DB[(MySQL V4 Database)]
+        Cache[(Session/Token Cache)]
+    end
+
+    %% Flows
+    Student <--> |HTTPS/REST| ReactUI
+    Admin <--> |HTTPS/REST| ReactUI
     
-    S --> |Submit Test| GenTest
-    GenTest --> |Profile Init| DB
+    ReactUI --> |JWT Credentials| Auth
+    Auth --> |Validate| DB
+    Auth --> |Store Session| Cache
+
+    ReactUI --> |Test Answers| TestEng
+    TestEng --> |Store History| DB
     
-    S --> |Submit Answers| AdapTest
-    AdapTest --> |Read/Write History| DB
+    TestEng --> |Trigger Evaluation| AdapEng
+    AdapEng --> |Read Mastery| DB
+    AdapEng --> |Update Knowledge State| DB
     
-    RecEng <-- |Fetch Profile| DB
-    RecEng --> |Suggest Actions| S
+    AdapEng --> |Trigger Insights| AnalytEng
+    AnalytEng --> |Compute Trends/Persona| DB
     
-    A --> |Manage System| DB
-    DB --> |Aggregate Data| Analyt
-    Analyt --> |Dashboard Views| A
+    ReactUI <-- |Fetch Dashboards| AnalytEng
+    ReactUI <-- |Fetch Explanations| RecEng
+    RecEng <-- |Read Persona & Weaknesses| DB
+
+    ReactUI --> |Manage Users/Qs| AdminEng
+    AdminEng --> |Write Questions| DB
 ```
 
 ### 2. Diagram Explanation
@@ -91,24 +133,37 @@ Identifies the primary functional areas of the codebase, aiding developers in st
 ### 1. Professional Block Diagram
 ```mermaid
 flowchart TD
-    S((Student)) --> |Input Answers| TestEngine[Adaptive Test Generation]
+    %% Detailed Internal Processing
+    Incoming[Incoming Test Submission] --> TestCtrl[Test Controller]
     
-    subgraph Processing Engines
-        TestEngine --> |Evaluate Response| Behavior[Behavior Analysis Engine]
-        Behavior --> |Metrics| DKT[Knowledge Tracking Engine]
-        DKT --> |Update State| DB[(Database)]
+    subgraph Sequential Processing Pipeline [V3.0/V4.0 Sequential Pipeline]
+        TestCtrl --> Validate[Validate Request & Auth]
+        Validate --> Iterate[Iterate Through Responses]
         
-        DB --> |Fetch State| Persona[Learning Persona Engine]
-        Persona --> |Assign Profile| DB
-        
-        DB --> |Weaknesses| Rec[Recommendation Engine]
-        
-        QGF[Blueprint Engine] --> |Gen Config| Meta[Metadata Engine]
-        Meta --> |New Qs| DB
+        Iterate --> RLEngine[Reward Engine]
+        RLEngine --> |Calculate Reward| DKT[Knowledge Tracking Service]
+        DKT --> |Update Domain/Topic Mastery| Hist[Question History Logger]
+        Hist --> NextResp{More Responses?}
+        NextResp -->|Yes| Iterate
+        NextResp -->|No| Agg[Aggregate Test Stats]
     end
     
-    Rec --> |Pathways| Dash[Analytics Dashboard]
-    Dash --> |View| S
+    subgraph Continuous Evaluation [Asynchronous / Post-Test]
+        Agg --> Behavior[Behavior Analysis Service]
+        Behavior --> Trend[Learning Trend Service]
+        Trend --> Persona[Learning Persona Service]
+        Persona --> Interest[Student Interest Service]
+        Interest --> Conf[Confidence Estimation]
+        Conf --> Goal[Goal Progress Tracking]
+    end
+    
+    subgraph AI Feedback Loop
+        Goal --> DiffAdj[Determine Next Difficulty]
+        DiffAdj --> ExplainAI[Explainable AI Service]
+    end
+    
+    ExplainAI --> DBWrite[(Write Final Results & Recs to DB)]
+    DBWrite --> Return[Return JSON to Client]
 ```
 
 ### 2. Diagram Explanation
@@ -370,40 +425,113 @@ Prevents data redundancy and orphan records, serving as the direct blueprint for
 ### 1. Professional Block Diagram
 ```mermaid
 erDiagram
-    USERS {
+    %% Core Users
+    users {
         int id PK
-        string email
-        string password_hash
-        string role
+        varchar name
+        varchar email
+        varchar password_hash
+        enum role
+        datetime created_at
     }
-    STUDENT_PROFILES {
-        int user_id FK
+    
+    %% Profiles
+    student_profile {
+        int user_id PK, FK
+        boolean general_assessment_completed
         decimal general_test_score
-        boolean adaptive_access
+        boolean adaptive_access_enabled
+        datetime created_at
     }
-    KNOWLEDGE_STATE {
+
+    %% Knowledge Tracking
+    knowledge_state {
         int id PK
         int user_id FK
-        int domain_id FK
-        decimal mastery_score
-    }
-    QUESTIONS {
-        int id PK
-        int topic_id FK
-        string text
+        int domain_id
+        int topic_id
         int difficulty_id
+        decimal mastery_score
+        datetime last_updated
     }
-    QUESTION_HISTORY {
+    
+    %% Analytics Histories
+    learning_persona_history {
         int id PK
+        int user_id FK
+        varchar persona
+        varchar reason
+        datetime recorded_at
+    }
+    
+    student_interest_history {
+        int id PK
+        int user_id FK
+        int domain_id
+        int topic_id
+        decimal interest_score
+    }
+    
+    goal_progress {
+        int id PK
+        int user_id FK
+        varchar selected_goal
+        decimal progress_percentage
+    }
+
+    %% Testing
+    tests {
+        int id PK
+        int user_id FK
+        enum test_type
+        enum status
+        int score
+        decimal accuracy
+        int avg_response_time_ms
+    }
+
+    question_history {
+        int id PK
+        int user_id FK
         int test_id FK
         int question_id FK
         boolean is_correct
+        boolean was_skipped
         int response_time_ms
+        decimal reward_earned
+    }
+    
+    questions {
+        int id PK
+        text text
+        int domain_id
+        int topic_id
+        int difficulty_id
+        int estimated_solving_time
     }
 
-    USERS ||--|| STUDENT_PROFILES : "1:1"
-    STUDENT_PROFILES ||--o{ KNOWLEDGE_STATE : "1:N"
-    QUESTIONS ||--o{ QUESTION_HISTORY : "1:N"
+    recommendations {
+        int id PK
+        int user_id FK
+        int test_id FK
+        enum recommended_difficulty
+        text explanation
+    }
+
+    %% Relationships
+    users ||--|| student_profile : "has_one"
+    users ||--o{ knowledge_state : "maintains"
+    users ||--o{ learning_persona_history : "tracks"
+    users ||--o{ student_interest_history : "tracks"
+    users ||--o{ goal_progress : "tracks"
+    
+    users ||--o{ tests : "takes"
+    tests ||--o{ question_history : "contains"
+    users ||--o{ question_history : "records"
+    questions ||--o{ question_history : "referenced_by"
+    
+    users ||--o{ recommendations : "receives"
+    tests ||--o| recommendations : "generates"
 ```
 
 ### 2. Diagram Explanation
